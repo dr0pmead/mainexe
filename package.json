@@ -6,10 +6,6 @@
     "start": "electron .",
     "build": "electron-builder"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "build": {
     "appId": "com.rubikom.connect",
     "productName": "AdminRubikom",
@@ -19,9 +15,9 @@
       "preload.js"
     ],
     "publish": {
-        "provider": "github",
-        "owner": "your-github-username",
-        "repo": "your-repo-name"
+      "provider": "github",
+      "owner": "dr0pmead",
+      "repo": "mainexe"
     },
     "files": [
       "src/**/*",
@@ -38,22 +34,16 @@
     },
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false,
       "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "shortcutName": "Рубиком Администратор",
       "allowToChangeInstallationDirectory": true,
       "uninstallerIcon": "build/icon.ico",
       "installerIcon": "build/icon.ico",
       "uninstallDisplayName": "Рубиком Администратор",
-      "runAfterFinish": true
-    },
-    "squirrelWindows": {
-      "iconUrl": "https://rubikom.kz/",
-      "setupIcon": "build/icon.ico",
-      "shortcutName": "Рубиком Администратор"
+      "runAfterFinish": true,
+      "artifactName": "${productName} Setup ${version}.${ext}"
     }
   },
   "dependencies": {
