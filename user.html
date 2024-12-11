@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Настройки пользователя</title>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+    <div class="bg-gray-800 p-6 shadow-lg w-full h-full">
+        <h2 class="text-xl font-semibold mb-4">Настройки пользователя</h2>
+        <form id="userForm" class="space-y-4">
+            <div>
+                <label class="block text-sm">Инвентарный номер:</label>
+                <input type="text" id="inventory_number" class="w-full p-2 rounded bg-gray-700 text-white" required>
+            </div>
+            <div>
+                <label class="block text-sm">Подразделение:</label>
+                <select id="department" class="w-full p-2 rounded bg-gray-700 text-white" required>
+                    <option value="" disabled selected>Выберите подразделение</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm">Отдел:</label>
+                <select id="division" class="w-full p-2 rounded bg-gray-700 text-white" required>
+                    <option value="" disabled selected>Сначала выберите подразделение</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm">Пользователь:</label>
+                <input type="text" id="user" class="w-full p-2 rounded bg-gray-700 text-white" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 p-2 rounded">Сохранить</button>
+        </form>
+        
+    </div>
+    <script>
+        console.log('electronAPI доступен:', window.electronAPI);
+    
+        const departmentSelect = document.getElementById('department');
+        const divisionSelect = document.getElementById('division');
+    
+        // Загрузка данных пользователя и подразделений
+        window.electronAPI.loadUserData(({ userData, departments }) => {
+            console.log('Полученные данные:', { userData, departments });
+    
+            // Заполнение списка подразделений (departments)
+            if (departments && Array.isArray(departments)) {
+                departments.forEach((dept) => {
+                    const option = document.createElement('option');
+                    option.value = dept.name;
+                    option.textContent = dept.name;
+                    departmentSelect.appendChild(option);
+                });
+            }
+    
+            // Заполнение данных пользователя, если есть userData
+            if (userData) {
+                document.getElementById('inventory_number').value = userData.inventory_number || '';
+                document.getElementById('department').value = userData.department || '';
+                document.getElementById('user').value = userData.user || '';
+    
+                // Если выбрано подразделение, заполняем список отделов
+                if (userData.department) {
+                    const selectedDepartment = departments.find(dept => dept.name === userData.department);
+    
+                    if (selectedDepartment && Array.isArray(selectedDepartment.divisions)) {
+                        divisionSelect.innerHTML = '<option disabled selected>Выберите отдел</option>';
+                        selectedDepartment.divisions.forEach((division) => {
+                            const option = document.createElement('option');
+                            option.value = division.name;
+                            option.textContent = division.name;
+                            divisionSelect.appendChild(option);
+                        });
+    
+                        divisionSelect.value = userData.division || ''; // Выставляем текущий отдел
+                    }
+                }
+            }
+        });
+    
+        // Обработчик смены подразделения
+        departmentSelect.addEventListener('change', (event) => {
+            const selectedDepartmentName = event.target.value;
+            divisionSelect.innerHTML = '<option disabled selected>Выберите отдел</option>';
+    
+            window.electronAPI.getDepartments().then((departments) => {
+                const selectedDepartment = departments.find(dept => dept.name === selectedDepartmentName);
+                if (selectedDepartment && Array.isArray(selectedDepartment.divisions)) {
+                    selectedDepartment.divisions.forEach((division) => {
+                        const option = document.createElement('option');
+                        option.value = division.name;
+                        option.textContent = division.name;
+                        divisionSelect.appendChild(option);
+                    });
+                }
+            });
+        });
+    
+        // Обработка формы (Сохранение данных)
+        const form = document.getElementById('userForm');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+    
+            const data = {
+                inventory_number: document.getElementById('inventory_number').value,
+                department: document.getElementById('department').value,
+                division: document.getElementById('division').value,
+                user: document.getElementById('user').value,
+            };
+    
+            console.log('Сохраняемые данные:', data);
+    
+            window.electronAPI.saveUserData(data).then(() => {
+                console.log('Данные успешно сохранены.');
+                window.close(); // Закрываем окно после сохранения
+            }).catch((error) => {
+                console.error('Ошибка при сохранении данных:', error);
+            });
+        });
+    </script>
+</body>
+</html>

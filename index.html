@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удалённый экран</title>
+</head>
+<body>
+    <h1>Удалённый экран</h1>
+    <video id="remote-video" autoplay></video>
+    <script>
+        // Получаем UUID и инициируем соединение
+        window.electronAPI.getUUID().then(uuid => {
+            if (uuid) {
+                console.log(`Прочитанный UUID: ${uuid}`);
+                window.electronAPI.initiateConnection(uuid).catch(console.error);
+            } else {
+                console.error('Не удалось получить UUID.');
+            }
+        });
+    </script>
+</body>
+</html>

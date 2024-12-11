@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Новое уведомление</title>
+  </head>
+  <body class="bg-black/80 flex items-center justify-center h-screen w-full">
+    <div
+      id="notification-container"
+      class="w-full relative flex justify-center h-[230px] "
+    >
+      <div class="mx-auto py-6 w-[50%] flex flex-col gap-2 justify-between">
+        <div>
+          <h1 id="title" class="text-4xl font-regular text-white ">
+            Новое уведомление
+          </h1>
+          <p id="message" class="text-white mt-2 text-xl"></p>
+        </div>
+        <div class="w-full flex justify-end">
+          <button
+            id="close-button"
+            class="py-1 px-6 border-[2px] border-white hover:bg-white/30 duration-150 text-white text-xl"
+          >
+            Закрыть
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      // Получение данных уведомления
+      ipcRenderer.on("notification-data", (event, data) => {
+            console.log("Полученные данные:", data); // Отладка
+            if (typeof data.title === 'string') {
+                document.getElementById("title").textContent = data.title;
+            }
+            if (typeof data.message === 'string') {
+                document.getElementById("message").textContent = data.message;
+            }
+        
+            // Установка цвета акцента
+            const container = document.getElementById("notification-container");
+            if (data.accentColor) {
+                container.style.backgroundColor = data.accentColor;
+            }
+        });
+
+      // Закрытие окна при нажатии на кнопку
+      document.getElementById("close-button").addEventListener("click", () => {
+        ipcRenderer.send("close-notification");
+      });
+    </script>
+  </body>
+</html>
